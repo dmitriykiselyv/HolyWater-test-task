@@ -12,7 +12,7 @@ namespace WeatherCards
         private CitiesData _citiesData;
         private readonly float _timeout = 10f;
         private readonly List<WeatherData> _weatherDatas = new List<WeatherData>();
-        
+
         public void Init()
         {
             LoadCitiesJson();
@@ -22,7 +22,12 @@ namespace WeatherCards
                 StartCoroutine(RefreshWeatherData());
             }
         }
-        
+
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
         private void LoadCitiesJson()
         {
             var citiesJson = Resources.Load<TextAsset>("Cities");
@@ -35,13 +40,13 @@ namespace WeatherCards
                 Debug.LogError("Failed to load Cities.json");
             }
         }
-        
+
         public IEnumerator RefreshWeatherData()
         {
             _weatherDatas.Clear();
-            yield return StartCoroutine(GetWeatherDataAsync()); 
+            yield return StartCoroutine(GetWeatherDataAsync());
         }
-        
+
         private IEnumerator GetWeatherDataAsync()
         {
             foreach (var city in _citiesData.Cities)
@@ -65,8 +70,8 @@ namespace WeatherCards
             {
                 case UnityWebRequest.Result.ConnectionError:
                 case UnityWebRequest.Result.ProtocolError:
-                    Debug.LogError($"Failed to get weather data for {city}: {request.error}");
-                    break;
+                Debug.LogError($"Failed to get weather data for {city}: {request.error}");
+                break;
                 case UnityWebRequest.Result.Success:
                 {
                     string json = request.downloadHandler.text;
@@ -76,12 +81,13 @@ namespace WeatherCards
                 }
             }
         }
-        
+
         private IEnumerator RequestTimeout(UnityWebRequest request, float timeout)
         {
             yield return new WaitForSeconds(timeout);
-            if (request.isDone) yield break;
-            
+            if (request.isDone)
+                yield break;
+
             request.Abort();
             Debug.LogError("Request timed out.");
         }

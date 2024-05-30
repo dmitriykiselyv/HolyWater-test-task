@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 namespace HorizontalScrollPanel
 {
@@ -13,13 +12,14 @@ namespace HorizontalScrollPanel
         [SerializeField] private float _maxSnapSpeed = 150f;
         [SerializeField] private float _minSnapSpeed = 3f;
         [SerializeField] private AutoScroll _autoScroll;
-        
+
         private bool _dragging;
 
         private void Update()
         {
-            if (_dragging || _autoScroll.IsAutoScrolling) return;
-            
+            if (_dragging || _autoScroll.IsAutoScrolling)
+                return;
+
             float closestDistance = float.MaxValue;
             int closestIndex = 0;
 
@@ -32,11 +32,11 @@ namespace HorizontalScrollPanel
                     closestIndex = i;
                 }
             }
-        
+
             float targetX = _anchorObject.position.x - _items[closestIndex].transform.position.x;
             var currentPosition = _panel.anchoredPosition.x;
             var desiredPosition = currentPosition + targetX;
-                
+
             var maxSpeed = _maxSnapSpeed * Time.deltaTime;
             var speed = Mathf.Max(_minSnapSpeed, Mathf.Min(Math.Abs(targetX), maxSpeed));
             var xLerpPos = Mathf.MoveTowards(currentPosition, desiredPosition, speed);
@@ -46,7 +46,7 @@ namespace HorizontalScrollPanel
         public void OnBeginDrag(PointerEventData eventData)
         {
             _dragging = true;
-            _autoScroll.ToggleAutoScroll(false); 
+            _autoScroll.ToggleAutoScroll(false);
             StopCoroutine(_autoScroll.RestartAutoScrollAfterDelay());
         }
 
@@ -54,6 +54,11 @@ namespace HorizontalScrollPanel
         {
             _dragging = false;
             StartCoroutine(_autoScroll.RestartAutoScrollAfterDelay());
+        }
+
+        private void OnDestroy()
+        {
+            StopCoroutine(_autoScroll.RestartAutoScrollAfterDelay());
         }
     }
 }

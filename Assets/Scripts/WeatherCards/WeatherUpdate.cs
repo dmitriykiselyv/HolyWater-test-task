@@ -10,7 +10,7 @@ namespace WeatherCards
 
         private WeatherDataFetcher _weatherDataFetcher;
         private readonly float _cooldown = 12f;
-        
+
         public void Init(WeatherDataFetcher weatherDataFetcher)
         {
             _weatherDataFetcher = weatherDataFetcher;
@@ -22,12 +22,17 @@ namespace WeatherCards
             _updateBttn.onClick.RemoveListener(UpdateWeatherContent);
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
         private void UpdateWeatherContent()
         {
             StartCoroutine(_weatherDataFetcher.RefreshWeatherData());
             StartCoroutine(StartCooldown());
         }
-        
+
         private IEnumerator StartCooldown()
         {
             _updateBttn.interactable = false;
