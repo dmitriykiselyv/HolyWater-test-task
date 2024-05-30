@@ -13,6 +13,7 @@ namespace UI
         [SerializeField] private Button _closeButton;
         [SerializeField] private float _animationDuration = 0.5f;
 
+        private Tweener _fadeTween;
         private bool _popupIsVisible;
 
         public void Awake()
@@ -22,6 +23,7 @@ namespace UI
 
         public void OnDestroy()
         {
+            _fadeTween?.Kill();
             _closeButton.onClick.RemoveListener(PopupClose);
         }
 
@@ -43,7 +45,6 @@ namespace UI
 
         private void SetPopupVisibility(bool isVisible)
         {
-            _canvasGroup.DOKill();
             _canvasGroup.interactable = isVisible;
             _canvasGroup.blocksRaycasts = isVisible;
             SetAlphaChannel(isVisible);
@@ -54,7 +55,7 @@ namespace UI
             float targetAlpha = isVisible ? 1f : 0f;
 
             _popupIsVisible = isVisible;
-            _canvasGroup.DOFade(targetAlpha, _animationDuration)
+            _fadeTween = _canvasGroup.DOFade(targetAlpha, _animationDuration)
                 .OnComplete(OnFadeComplete);
         }
 

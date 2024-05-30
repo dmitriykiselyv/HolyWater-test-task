@@ -11,8 +11,9 @@ namespace UI
         [SerializeField] private float _fadeDuration = 0.5f;
         [SerializeField] private int _numberOfFlashes = 3;
         [SerializeField] private UrlOpener _urlOpener;
-    
+
         private bool _isAnimating;
+        private Tweener _statusTextTweener;
 
         private void Awake()
         {
@@ -22,23 +23,24 @@ namespace UI
         private void OnDestroy()
         {
             _urlOpener.NoInternetConnection -= FlashText;
-            DOTween.Kill(_statusText);
+            _statusTextTweener?.Kill();
         }
 
         private void FlashText()
         {
-            if(_isAnimating) return;
-        
+            if (_isAnimating)
+                return;
+
             _isAnimating = true;
-            DOTween.Kill(_statusText);
-            _statusText.DOFade(1, _fadeDuration)
-                .SetLoops(_numberOfFlashes * 2, LoopType.Yoyo) 
+            _statusTextTweener?.Kill();
+            _statusTextTweener = _statusText.DOFade(1, _fadeDuration)
+                .SetLoops(_numberOfFlashes * 2, LoopType.Yoyo)
                 .OnComplete(StopAnimation);
         }
-    
+
         private void StopAnimation()
         {
-            DOTween.Kill(_statusText);
+            _statusTextTweener?.Kill();
             _statusText.alpha = 0;
             _isAnimating = false;
         }

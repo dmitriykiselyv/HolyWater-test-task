@@ -18,6 +18,8 @@ namespace BootScene
 
         private Action _activateNextScene;
         private SceneLoader _sceneLoader;
+        private Sequence _preloadSequence;
+        private Tweener _progressBarTweener;
 
         public void Init(SceneLoader sceneLoader)
         {
@@ -29,6 +31,12 @@ namespace BootScene
         public void DeInit()
         {
             _sceneLoader.OnSceneLoading -= SceneLoading;
+        }
+
+        private void OnDestroy()
+        {
+            _preloadSequence?.Kill();
+            _progressBarTweener?.Kill();
         }
 
         private void SetDefaultValues()
@@ -50,14 +58,14 @@ namespace BootScene
 
         private void PreloadAnimation()
         {
-            Sequence mySequence = DOTween.Sequence();
+            _preloadSequence = DOTween.Sequence();
 
-            mySequence.Append(_preloader.DOFillAmount(1, _fillSpeed).SetEase(Ease.Linear)
+            _preloadSequence.Append(_preloader.DOFillAmount(1, _fillSpeed).SetEase(Ease.Linear)
                 .OnComplete(OnPreloaderFillComplete));
-            mySequence.Append(_preloader.DOFillAmount(0, _fillSpeed).SetEase(Ease.Linear)
+            _preloadSequence.Append(_preloader.DOFillAmount(0, _fillSpeed).SetEase(Ease.Linear)
                 .OnRewind(OnPreloaderFillRewind));
 
-            mySequence.SetLoops(-1);
+            _preloadSequence.SetLoops(-1);
         }
 
         private void OnPreloaderFillComplete()
@@ -72,7 +80,7 @@ namespace BootScene
 
         private void FakeProgressBarFilling()
         {
-            DOTween.To(GetFillAmount, SetFillAmount, _targetFillAmount, _fakeLoadDuration)
+            _progressBarTweener = DOTween.To(GetFillAmount, SetFillAmount, _targetFillAmount, _fakeLoadDuration)
                    .OnUpdate(UpdatePercentageText)
                    .OnComplete(OnComplete);
         }
@@ -94,7 +102,6 @@ namespace BootScene
 
         private void OnComplete()
         {
-            DOTween.KillAll();
             _activateNextScene?.Invoke();
         }
     }
